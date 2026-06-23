@@ -1,0 +1,14 @@
+<div class="col-lg-2 sidebar-footer hidden-small">
+    <a data-toggle="tooltip" data-placement="top" title="Settings">
+        <span class="fa fa-cog" aria-hidden="true"></span>
+    </a>
+    <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+        <span class="fa fa-arrows-alt" aria-hidden="true"></span>
+    </a>
+    <a data-toggle="tooltip" data-placement="top" title="Lock">
+        <span class="fa fa-eye-slash" aria-hidden="true"></span>
+    </a>
+    <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
+        <span class="fa fa-power-off" aria-hidden="true"></span>
+    </a>
+</div>
