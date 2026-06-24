@@ -54,29 +54,125 @@ require_once "config/header.php";
 
                         <!-- page content -->
                         <div class="right_col col-md-12" role="main">
-                        
-                        </div>
-                        <!-- /page content -->
+                            <div class="x_panel">
+                                <div class="x_title">
+                                    <h2>Projetos
+                                    </h2>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
 
-                        <!-- footer content -->
-                        <footer class="col-md-12">
-                            <div class="pull-right">
-                                Inovatec Automação Industrial - <a href="https://inovatecautomacao.com.br/">Inovatec</a>
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome do Projeto</th>
+                                                <th>Etapa 1</th>
+                                                <th>Etapa 2</th>
+                                                <th>Etapa 3</th>
+                                                <th>Etapa 4</th>
+                                                <th>Data Limite</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Teste</td>
+                                                <th scope="row">2</th>
+                                                <td>
+                                                    <button class="" data-toggle="modal"
+                                                        data-target="#modalExcluirProjeto">
+                                                        <div class="progress progress_sm" style="width: 70%;">
+                                                            <div class="progress-bar bg-green" role="progressbar"
+                                                                data-transitiongoal="">
+                                                            </div>
+                                                        </div>
+                                                    </button>
+
+
+                                                </td>
+                                                <td>
+                                                    <div class="progress progress_sm" style="width: 70%;">
+                                                        <div class="progress-bar bg-green" role="progressbar"
+                                                            data-transitiongoal="">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="progress progress_sm" style="width: 70%;">
+                                                        <div class="progress-bar bg-green" role="progressbar"
+                                                            data-transitiongoal="">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="progress progress_sm" style="width: 70%;">
+                                                        <div class="progress-bar bg-green" role="progressbar"
+                                                            data-transitiongoal="">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-danger btn-sm btn-excluir-celular"
+                                                        title="Excluir"
+                                                        data-toggle="modal"
+                                                        data-target="#modalExcluirProjeto"
+                                                        data-id="0"
+                                                        data-modelo="0, ENT_QUOTES); ?>">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- /page content -->
+
+
+                                    <!-- footer content -->
+                                    <footer class="col-md-12">
+                                        <div class="pull-right">
+                                            Inovatec Automação Industrial - <a href="https://inovatecautomacao.com.br/">Inovatec</a>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                    </footer>
+                                </div>
                             </div>
-                            <div class="clearfix"></div>
-                        </footer>
+                            <!-- /footer content -->
+
+                        </div>
                     </div>
                 </div>
-                <!-- /footer content -->
-                 
-            </div>
-        </div>
-    </div>
+                <div class="modal fade" id="modalExcluirProjeto" tabindex="-1" role="dialog" aria-labelledby="modalExcluirProjetorLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalExcluirProjetoLabel">Excluir Projeto</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Deseja realmente excluir o Projeto <strong id="nomeProjetoExcluir"></strong>?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
 
-    <?php
-        require_once "config/scripts.php";
-    ?>
+                                <form method="post" action="projetos.php" class="m-0">
 
+                                    <input type="hidden" name="acao" value="excluir">
+
+                                    <input type="hidden" name="id" id="idProjetoExcluir" value="">
+
+                                    <button type="submit" class="btn btn-danger">Excluir</button>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                    <?php
+                    require_once "config/scripts.php";
+                    ?>
 </body>
 
 </html>
