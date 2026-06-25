@@ -34,5 +34,12 @@
     <script src="js/moment.min.js"></script>
     <script src="js/daterangepicker.js"></script>
 
+    <!-- jquery.inputmask -->
+    <script src="js/inputmask.date.extensions.js"></script>
+    <script src="js/inputmask.dependencyLib.jquery.js"></script>
+    <script src="js/inputmask.extensions.js"></script>
+    <script src="js/inputmask.js"></script>
+    <script src="js/jquery.inputmask.js"></script>
+
     <!-- Custom Theme Scripts -->
     <script src="js/custom.min.js"></script>

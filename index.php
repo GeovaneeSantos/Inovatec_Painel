@@ -212,7 +212,7 @@ require_once "config/header.php";
                                             else{
                                                 ?>
                                                     <tr>
-                                                        <td colspan="6" class="text-center">Nenhum celular cadastrado.</td>
+                                                        <td colspan="6" class="text-center">Nenhum projeto cadastrado.</td>
                                                     </tr>
 
                                                 <?php

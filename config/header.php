@@ -28,4 +28,8 @@
     <!-- Custom Theme Style -->
     <link href="css/custom.css" rel="stylesheet">
     <link href="css/style-extra-bs4.css" rel="stylesheet">
+
+    <link href="css/bootstrap-datetimepicker.css" rel="stylesheet">
+    <link href="css/normalize.css" rel="stylesheet">
+    <link href="css/cropper.min.css" rel="stylesheet">
 </head>
