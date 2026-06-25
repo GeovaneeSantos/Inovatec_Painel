@@ -1,5 +1,9 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+    $etapaUm = array("TASK1","TASK2","TASK3");
+
+
+
     require_once 'config/conexao.php';
 
     $centroDeCusto = isset($_POST['centroDeCustos']) ? trim($_POST['centroDeCustos']) : '';
@@ -27,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
                 header("HTTP/1.1 500 Internal Server Error");
                 exit();
             }
+
 
         } catch (PDOException $e) {
             header("HTTP/1.1 404 Not Found");

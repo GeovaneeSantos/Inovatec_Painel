@@ -6,7 +6,6 @@ $stmtSelect = $conexao->prepare($sql);
 $stmtSelect->execute();
 $result = $stmtSelect->fetchAll();
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'excluir') {
     require_once 'config/conexao.php';
 
@@ -121,79 +120,83 @@ require_once "config/header.php";
 
                                         </thead>
                                         <tbody>
-                                            <?php 
-                                            if(sizeof($result) > 0){
-                                            for ($i = 0; $i < sizeof($result); $i++) { ?>
-                                                <tr>
-                                                    <td>
+                                            <?php
+                                            if (sizeof($result) > 0) {
+                                                for ($i = 0; $i < sizeof($result); $i++) { ?>
+                                                    <tr>
+                                                        <td>
 
-                                                        <?php
-                                                        echo $result[$i]['centro_Cust'] .
-                                                            " " .
-                                                            $result[$i]['cliente'] .
-                                                            " " .
-                                                            $result[$i]['nome_proj'];
-
-                                                        ?>
-
-                                                    </td>
-                                                    <th scope="row">
-                                                        <?php
-                                                        echo $result[$i]['id'];
-                                                        ?>
-                                                    </th>
-                                                    <td>
-                                                        <div style="cursor: pointer">
-                                                            <div class="progress progress_sm" style="width: 70%;">
-                                                                <div class="progress-bar bg-green" role="progressbar"
-                                                                    data-transitiongoal="">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div style="cursor: pointer">
-                                                            <div class="progress progress_sm" style="width: 70%;">
-                                                                <div class="progress-bar bg-green" role="progressbar"
-                                                                    data-transitiongoal="">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div style="cursor: pointer">
-                                                            <div class="progress progress_sm" style="width: 70%;">
-                                                                <div class="progress-bar bg-green" role="progressbar"
-                                                                    data-transitiongoal="">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div style="cursor: pointer">
-                                                            <div class="progress progress_sm" style="width: 70%;">
-                                                                <div class="progress-bar bg-green" role="progressbar"
-                                                                    data-transitiongoal="">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span>
                                                             <?php
-                                                            echo $result[$i]['dt_termino'];
+                                                            echo $result[$i]['centro_Cust'] .
+                                                                " " .
+                                                                $result[$i]['cliente'] .
+                                                                " " .
+                                                                $result[$i]['nome_proj'];
+
                                                             ?>
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-danger btn-sm btn-excluir-projeto"
-                                                            title="Excluir"
-                                                            data-toggle="modal"
-                                                            data-target="#modalExcluirProjeto"
-                                                            data-id="<?php echo $result[$i]['id']; ?>"
-                                                            data-name="
+
+                                                        </td>
+                                                        <th scope="row">
+                                                            <?php
+                                                            echo $result[$i]['id'];
+                                                            ?>
+                                                        </th>
+                                                        <td>
+                                                            <div style="cursor: pointer"
+                                                                data-id="<?php echo $result[$i]['id']; ?>"
+                                                                data-toggle="modal"
+                                                                data-target=".bs-example-modal-lg">
+
+                                                                <div class="progress progress_sm" style="width: 70%;">
+                                                                    <div class="progress-bar bg-green" role="progressbar"
+                                                                        data-transitiongoal="">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div style="cursor: pointer">
+                                                                <div class="progress progress_sm" style="width: 70%;">
+                                                                    <div class="progress-bar bg-green" role="progressbar"
+                                                                        data-transitiongoal="">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div style="cursor: pointer">
+                                                                <div class="progress progress_sm" style="width: 70%;">
+                                                                    <div class="progress-bar bg-green" role="progressbar"
+                                                                        data-transitiongoal="">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div style="cursor: pointer">
+                                                                <div class="progress progress_sm" style="width: 70%;">
+                                                                    <div class="progress-bar bg-green" role="progressbar"
+                                                                        data-transitiongoal="">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <span>
+                                                                <?php
+                                                                echo $result[$i]['dt_termino'];
+                                                                ?>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-danger btn-sm btn-excluir-projeto"
+                                                                title="Excluir"
+                                                                data-toggle="modal"
+                                                                data-target="#modalExcluirProjeto"
+                                                                data-id="<?php echo $result[$i]['id']; ?>"
+                                                                data-name="
                                                             <?php
 
                                                             echo $result[$i]['centro_Cust'] .
@@ -204,18 +207,18 @@ require_once "config/header.php";
 
                                                             ?>
                                                              ">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            <?php }}
-                                            else{
-                                                ?>
-                                                    <tr>
-                                                        <td colspan="6" class="text-center">Nenhum projeto cadastrado.</td>
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </td>
                                                     </tr>
+                                                <?php }
+                                            } else {
+                                                ?>
+                                                <tr>
+                                                    <td colspan="6" class="text-center">Nenhum projeto cadastrado.</td>
+                                                </tr>
 
-                                                <?php
+                                            <?php
                                             }
                                             ?>
                                         </tbody>
@@ -264,28 +267,47 @@ require_once "config/header.php";
                         </div>
                     </div>
                 </div>
-                <div id="modalTarefas" class="modal-overlay" style="display: none;">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2 id="modalTitle">Tarefas</h2>
-                            <button onclick="fecharModal()" class="close-btn">&times;</button>
-                        </div>
 
-                        <div class="modal-body">
-                            <div id="loaderTarefas" style="display: none;">Carregando...</div>
-                            <table id="tabelaTarefas" style="width: 100%; display: none;">
-                                <thead>
-                                    <tr>
-                                        <th>Tarefa</th>
-                                        <th>Status</th>
-                                        <th>Tempo (h)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="listaTarefas"></tbody>
-                            </table>
+                <button type="button" class="btn btn-primary" data-toggle="modal"
+                    data-target=".bs-example-modal-lg">Large modal
+                </button>
+
+                <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                                <button type="button" class="close"
+                                    data-dismiss="modal"><span
+                                        aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <?php
+                                $id = (int) 11;
+                                $sqlTask = "SELECT * FROM tarefas where id_proj = :id_proj";
+                                $stmtSelTask = $conexao->prepare($sqlTask);
+                                $stmtSelTask->bindParam(':id_proj', $id, PDO::PARAM_INT);
+                                $stmtSelTask->execute();
+                                $resultTasks = $stmtSelTask->fetchAll();
+                                print_r($resultTasks);
+                                ?>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-light"
+                                    data-dismiss="modal">
+                                    Close
+                                </button>
+                                <button type="button" class="btn btn-primary">Save changes
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
+
                 <?php
                 require_once "config/scripts.php";
                 ?>
