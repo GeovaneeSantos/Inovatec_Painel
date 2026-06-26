@@ -45,42 +45,7 @@ require_once "config/header.php";
     <div class="body">
         <div class="main_container container-fluid">
             <div class="row">
-                <div class="col-lg-2 col-md-2 left_col">
-                    <div class="left_col">
-                        <div class="navbar nav_title" style="border: 0;">
-                            <a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>Gentelella Alela!</span></a>
-                        </div>
-                        <div class="clearfix"></div>
-
-                        <!-- menu profile quick info -->
-
-                        <div class="profile clearfix">
-                            <div class="profile_pic">
-                                <img src="images/img.jpg" alt="..." class="img-circle profile_img">
-                            </div>
-                            <div class="profile_info">
-                                <span>Welcome,</span>
-                                <h2>John Doe</h2>
-                            </div>
-                        </div>
-                        <!-- /menu profile quick info -->
-                        <br />
-
-                        <!-- sidebar menu -->
-                        <?php
-                        require_once "views/sidemenu.php";
-                        ?>
-                        <!-- /sidebar menu -->
-
-                        <!-- /menu footer buttons -->
-                        <?php
-                        require_once "views/menuFooter.php";
-                        ?>
-                        <!-- /menu footer buttons -->
-
-                    </div>
-                </div>
-                <div class="col-lg-10 col-md-12 right_col_wrapper">
+                <div class="col-lg-12 col-md-12 right_col_wrapper">
                     <div class="row">
 
                         <!-- top navigation -->
@@ -92,13 +57,14 @@ require_once "config/header.php";
                         <!-- page content -->
                         <div class="right_col col-md-12" role="main">
                             <div class="x_panel">
+
                                 <div class="x_title">
                                     <h2>
                                         Projetos
                                     </h2>
                                 </div>
-                                <div class="x_content">
 
+                                <div class="x_content">
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
@@ -110,7 +76,7 @@ require_once "config/header.php";
                                                 <th>Etapa 4</th>
                                                 <th>Data Limite</th>
                                                 <th>
-                                                    <div class="col-sm-9 col-9 text-center gap-2 d-grid">
+                                                    <div class="col-sm-12 col-12 text-center gap-2 d-grid">
                                                         <a href="novoProjeto.php" class="btn btn-success btn-sm">
                                                             Criar Projeto
                                                         </a>
@@ -121,8 +87,10 @@ require_once "config/header.php";
                                         </thead>
                                         <tbody>
                                             <?php
+                                            // Laço de repetição para passar por todos os projetos
                                             if (sizeof($result) > 0) {
                                                 for ($i = 0; $i < sizeof($result); $i++) { ?>
+
                                                     <tr>
                                                         <td>
 
@@ -142,11 +110,17 @@ require_once "config/header.php";
                                                             ?>
                                                         </th>
                                                         <td>
+                                                            <div style="cursor: pointer" id="teste">
+                                                                <div class="progress progress_sm" style="width: 70%;">
+                                                                    <div class="progress-bar bg-green" role="progressbar"
+                                                                        data-transitiongoal="">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
                                                             <div style="cursor: pointer"
-                                                                data-id="<?php echo $result[$i]['id']; ?>"
-                                                                data-toggle="modal"
-                                                                data-target=".bs-example-modal-lg">
-
+                                                                project-id="<?php echo $result[$i]['id']; ?>">
                                                                 <div class="progress progress_sm" style="width: 70%;">
                                                                     <div class="progress-bar bg-green" role="progressbar"
                                                                         data-transitiongoal="">
@@ -155,7 +129,8 @@ require_once "config/header.php";
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <div style="cursor: pointer">
+                                                            <div style="cursor: pointer"
+                                                                project-id="<?php echo $result[$i]['id']; ?>">
                                                                 <div class="progress progress_sm" style="width: 70%;">
                                                                     <div class="progress-bar bg-green" role="progressbar"
                                                                         data-transitiongoal="">
@@ -164,16 +139,8 @@ require_once "config/header.php";
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <div style="cursor: pointer">
-                                                                <div class="progress progress_sm" style="width: 70%;">
-                                                                    <div class="progress-bar bg-green" role="progressbar"
-                                                                        data-transitiongoal="">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div style="cursor: pointer">
+                                                            <div style="cursor: pointer"
+                                                                project-id="<?php echo $result[$i]['id']; ?>">
                                                                 <div class="progress progress_sm" style="width: 70%;">
                                                                     <div class="progress-bar bg-green" role="progressbar"
                                                                         data-transitiongoal="">
@@ -268,62 +235,31 @@ require_once "config/header.php";
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-primary" data-toggle="modal"
-                    data-target=".bs-example-modal-lg">Large modal
-                </button>
-
-                <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                                <button type="button" class="close"
-                                    data-dismiss="modal"><span
-                                        aria-hidden="true">×</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <?php
-                                $id = (int) 11;
-                                $sqlTask = "SELECT * FROM tarefas where id_proj = :id_proj";
-                                $stmtSelTask = $conexao->prepare($sqlTask);
-                                $stmtSelTask->bindParam(':id_proj', $id, PDO::PARAM_INT);
-                                $stmtSelTask->execute();
-                                $resultTasks = $stmtSelTask->fetchAll();
-                                print_r($resultTasks);
-                                ?>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-light"
-                                    data-dismiss="modal">
-                                    Close
-                                </button>
-                                <button type="button" class="btn btn-primary">Save changes
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
                 <?php
                 require_once "config/scripts.php";
                 ?>
+
                 <script>
                     (function() {
-                        var botoesExcluir = document.querySelectorAll('.btn-excluir-projeto');
-                        var campoIdExcluir = document.getElementById('idProjetoExcluir');
-                        var nomeProjetoExcluir = document.getElementById('nomeProjetoExcluir');
+                            var botoesExcluir = document.querySelectorAll('.btn-excluir-projeto');
+                            var campoIdExcluir = document.getElementById('idProjetoExcluir');
+                            var nomeProjetoExcluir = document.getElementById('nomeProjetoExcluir');
 
-                        for (var i = 0; i < botoesExcluir.length; i++) {
-                            botoesExcluir[i].addEventListener('click', function() {
-                                campoIdExcluir.value = this.getAttribute('data-id');
-                                nomeProjetoExcluir.textContent = this.getAttribute('data-name');
-                            });
-                        }
-                    })();
+                            var teste = document.getElementById('teste');
+
+                            for (var i = 0; i < botoesExcluir.length; i++) {
+                                botoesExcluir[i].addEventListener('click', function() {
+                                    campoIdExcluir.value = this.getAttribute('data-id');
+                                    nomeProjetoExcluir.textContent = this.getAttribute('data-name');
+                                });
+
+                                for (var i = 0; i < teste.length; i++) {
+                                    teste[i].addEventListener('click', function() {
+                                        console.log("teste ok")
+                                    });
+
+                                }
+                            })();
                 </script>
 </body>
 
