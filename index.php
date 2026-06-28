@@ -1,21 +1,21 @@
 <?php
 require_once "config/conexao.php";
-
-function getStageProgress($conexao, $projectId, $stageName) {
+function getStageProgress($conexao, $projectId, $stageName)
+{
     $sql = "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'CONCLUIDO' THEN 1 ELSE 0 END) as concluidas FROM tarefas WHERE id_proj = :id AND etapa = :etapa";
     $stmt = $conexao->prepare($sql);
     $stmt->bindParam(':id', $projectId, PDO::PARAM_INT);
     $stmt->bindParam(':etapa', $stageName, PDO::PARAM_STR);
     $stmt->execute();
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     $total = (int) ($data['total'] ?? 0);
     $concluidas = (int) ($data['concluidas'] ?? 0);
-    
+
     if ($total === 0) {
         return 0;
     }
-    
+
     return round(($concluidas / $total) * 100);
 }
 
@@ -129,7 +129,7 @@ require_once "config/header.php";
                                 </div>
 
                                 <div class="x_content">
-                                    <table class="table table-striped">
+                                    <table class="table table-hover ">
                                         <thead>
                                             <tr>
                                                 <th>Nome do Projeto</th>
@@ -175,12 +175,12 @@ require_once "config/header.php";
                                                         </th>
                                                         <td>
                                                             <a href="tabelaTarefas.php?<?= http_build_query([
-                                                                'idProj' => $result[$i]['id'],
-                                                                'nomeProj' => $result[$i]['nome_proj'],
-                                                                'cliente' => $result[$i]['cliente'],
-                                                                'centroCust' => $result[$i]['centro_Cust'],
-                                                                'etapa' => 'INICIAL'
-                                                            ]) ?>">
+                                                                                            'idProj' => $result[$i]['id'],
+                                                                                            'nomeProj' => $result[$i]['nome_proj'],
+                                                                                            'cliente' => $result[$i]['cliente'],
+                                                                                            'centroCust' => $result[$i]['centro_Cust'],
+                                                                                            'etapa' => 'INICIAL'
+                                                                                        ]) ?>">
                                                                 <div style="cursor: pointer" id="teste">
                                                                     <?php $progressInicial = getStageProgress($conexao, $result[$i]['id'], 'INICIAL'); ?>
                                                                     <div class="progress progress_sm" style="width: 70%;">
@@ -193,12 +193,12 @@ require_once "config/header.php";
 
                                                         <td>
                                                             <a href="tabelaTarefas.php?<?= http_build_query([
-                                                                'idProj' => $result[$i]['id'],
-                                                                'nomeProj' => $result[$i]['nome_proj'],
-                                                                'cliente' => $result[$i]['cliente'],
-                                                                'centroCust' => $result[$i]['centro_Cust'],
-                                                                'etapa' => 'PRODUCAO'
-                                                            ]) ?>">
+                                                                                            'idProj' => $result[$i]['id'],
+                                                                                            'nomeProj' => $result[$i]['nome_proj'],
+                                                                                            'cliente' => $result[$i]['cliente'],
+                                                                                            'centroCust' => $result[$i]['centro_Cust'],
+                                                                                            'etapa' => 'PRODUCAO'
+                                                                                        ]) ?>">
                                                                 <div style="cursor: pointer" id="teste">
                                                                     <?php $progressProducao = getStageProgress($conexao, $result[$i]['id'], 'PRODUCAO'); ?>
                                                                     <div class="progress progress_sm" style="width: 70%;">
@@ -211,12 +211,12 @@ require_once "config/header.php";
 
                                                         <td>
                                                             <a href="tabelaTarefas.php?<?= http_build_query([
-                                                                'idProj' => $result[$i]['id'],
-                                                                'nomeProj' => $result[$i]['nome_proj'],
-                                                                'cliente' => $result[$i]['cliente'],
-                                                                'centroCust' => $result[$i]['centro_Cust'],
-                                                                'etapa' => 'SOFTWARE'
-                                                            ]) ?>">
+                                                                                            'idProj' => $result[$i]['id'],
+                                                                                            'nomeProj' => $result[$i]['nome_proj'],
+                                                                                            'cliente' => $result[$i]['cliente'],
+                                                                                            'centroCust' => $result[$i]['centro_Cust'],
+                                                                                            'etapa' => 'SOFTWARE'
+                                                                                        ]) ?>">
                                                                 <div style="cursor: pointer" id="teste">
                                                                     <?php $progressSoftware = getStageProgress($conexao, $result[$i]['id'], 'SOFTWARE'); ?>
                                                                     <div class="progress progress_sm" style="width: 70%;">
@@ -229,12 +229,12 @@ require_once "config/header.php";
 
                                                         <td>
                                                             <a href="tabelaTarefas.php?<?= http_build_query([
-                                                                'idProj' => $result[$i]['id'],
-                                                                'nomeProj' => $result[$i]['nome_proj'],
-                                                                'cliente' => $result[$i]['cliente'],
-                                                                'centroCust' => $result[$i]['centro_Cust'],
-                                                                'etapa' => 'FINALIZACAO'
-                                                            ]) ?>">
+                                                                                            'idProj' => $result[$i]['id'],
+                                                                                            'nomeProj' => $result[$i]['nome_proj'],
+                                                                                            'cliente' => $result[$i]['cliente'],
+                                                                                            'centroCust' => $result[$i]['centro_Cust'],
+                                                                                            'etapa' => 'FINALIZACAO'
+                                                                                        ]) ?>">
                                                                 <div style="cursor: pointer" id="teste">
                                                                     <?php $progressFinalizacao = getStageProgress($conexao, $result[$i]['id'], 'FINALIZACAO'); ?>
                                                                     <div class="progress progress_sm" style="width: 70%;">
@@ -407,45 +407,45 @@ require_once "config/header.php";
                                 var statusSelecionado = selectStatusProjeto.value;
 
                                 fetch('index.php', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-                                    },
-                                    body: new URLSearchParams({
-                                        acao: 'atualizar_status',
-                                        id: projetoAtualId,
-                                        status: statusSelecionado
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                                        },
+                                        body: new URLSearchParams({
+                                            acao: 'atualizar_status',
+                                            id: projetoAtualId,
+                                            status: statusSelecionado
+                                        })
                                     })
-                                })
-                                .then(function(response) {
-                                    return response.json();
-                                })
-                                .then(function(data) {
-                                    if (data.ok) {
-                                        var linhaProjeto = document.querySelector('.project-row[data-id="' + projetoAtualId + '"]');
-                                        if (linhaProjeto) {
-                                            linhaProjeto.setAttribute('data-status', statusSelecionado);
-                                        }
-
-                                        var botaoStatus = document.querySelector('.btn-atualizar-status-projeto[data-id="' + projetoAtualId + '"]');
-                                        if (botaoStatus) {
-                                            botaoStatus.setAttribute('data-status', statusSelecionado);
-                                            var labelStatus = botaoStatus.querySelector('.status-label');
-                                            if (labelStatus) {
-                                                labelStatus.textContent = statusSelecionado;
+                                    .then(function(response) {
+                                        return response.json();
+                                    })
+                                    .then(function(data) {
+                                        if (data.ok) {
+                                            var linhaProjeto = document.querySelector('.project-row[data-id="' + projetoAtualId + '"]');
+                                            if (linhaProjeto) {
+                                                linhaProjeto.setAttribute('data-status', statusSelecionado);
                                             }
-                                        }
 
-                                        if (window.jQuery) {
-                                            jQuery('#modalAtualizarStatusProjeto').modal('hide');
+                                            var botaoStatus = document.querySelector('.btn-atualizar-status-projeto[data-id="' + projetoAtualId + '"]');
+                                            if (botaoStatus) {
+                                                botaoStatus.setAttribute('data-status', statusSelecionado);
+                                                var labelStatus = botaoStatus.querySelector('.status-label');
+                                                if (labelStatus) {
+                                                    labelStatus.textContent = statusSelecionado;
+                                                }
+                                            }
+
+                                            if (window.jQuery) {
+                                                jQuery('#modalAtualizarStatusProjeto').modal('hide');
+                                            }
+                                        } else {
+                                            alert('Não foi possível atualizar o status do projeto.');
                                         }
-                                    } else {
-                                        alert('Não foi possível atualizar o status do projeto.');
-                                    }
-                                })
-                                .catch(function() {
-                                    alert('Erro ao atualizar o status do projeto.');
-                                });
+                                    })
+                                    .catch(function() {
+                                        alert('Erro ao atualizar o status do projeto.');
+                                    });
                             });
                         }
                     })();

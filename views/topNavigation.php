@@ -24,10 +24,12 @@
                      <a href="javascript:;" class="user-profile dropdown-toggle"
                          data-toggle="dropdown"
                          aria-expanded="false" style="padding: 0 10px; line-height: 62px;">
-                         John Doe
+                         <?php
+                            echo $_SESSION['user_name'];
+                         ?>
                      </a>
                      <ul class="dropdown-menu dropdown-usermenu pull-right">
-                         <li><a href="login.html"><i class="fa fa-sign-out pull-right"></i> Log
+                         <li><a href="scripts/logout.php"><i class="fa fa-sign-out pull-right"></i> Log
                                  Out</a></li>
                      </ul>
                  </li>

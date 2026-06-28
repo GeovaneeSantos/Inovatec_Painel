@@ -1,3 +1,13 @@
+<?php
+
+session_start();
+// isset = verifica se variavel existe 
+if (!isset($_SESSION['user_name']) && basename($_SERVER['SCRIPT_NAME']) != "login.php") {
+    header('Location: login.php');  // Enviar para a tela de login
+    exit();
+}
+?>
+
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
