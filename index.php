@@ -24,45 +24,72 @@ $stmtSelect = $conexao->prepare($sql);
 $stmtSelect->execute();
 $result = $stmtSelect->fetchAll();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'excluir') {
+$allowedProjectStatuses = ['EM-ANDAMENTO', 'FINALIZADO', 'EM-ANALISE', 'PENDENTE'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
     require_once 'config/conexao.php';
 
-    $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+    if ($_POST['acao'] === 'excluir') {
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 
-    if ($id > 0) {
-        try {
-            // Primeiro, delete todos os comentários associados ao projeto
-            $sqlDeleteComentarios = "DELETE FROM comentarios WHERE id_proj = :id";
-            $stmtDeleteComentarios = $conexao->prepare($sqlDeleteComentarios);
-            $stmtDeleteComentarios->bindParam(':id', $id, PDO::PARAM_INT);
-            $stmtDeleteComentarios->execute();
+        if ($id > 0) {
+            try {
+                $sqlDeleteComentarios = "DELETE FROM comentarios WHERE id_proj = :id";
+                $stmtDeleteComentarios = $conexao->prepare($sqlDeleteComentarios);
+                $stmtDeleteComentarios->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmtDeleteComentarios->execute();
 
-            // Depois, delete todas as tarefas associadas ao projeto
-            $sqlDeleteTarefas = "DELETE FROM tarefas WHERE id_proj = :id";
-            $stmtDeleteTarefas = $conexao->prepare($sqlDeleteTarefas);
-            $stmtDeleteTarefas->bindParam(':id', $id, PDO::PARAM_INT);
-            $stmtDeleteTarefas->execute();
-            
-            // Depois, delete o projeto
-            $sqlDeleteProjeto = "DELETE FROM projetos WHERE id = :id";
-            $stmtDeleteProjeto = $conexao->prepare($sqlDeleteProjeto);
-            $stmtDeleteProjeto->bindParam(':id', $id, PDO::PARAM_INT);
+                $sqlDeleteTarefas = "DELETE FROM tarefas WHERE id_proj = :id";
+                $stmtDeleteTarefas = $conexao->prepare($sqlDeleteTarefas);
+                $stmtDeleteTarefas->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmtDeleteTarefas->execute();
 
-            if ($stmtDeleteProjeto->execute()) {
-                $rows = $stmtDeleteProjeto->rowCount();
-                header('Location: index.php');
-                exit();
-            } else {
-                $err = $stmtDeleteProjeto->errorInfo();
-                error_log('Erro ao executar DELETE: ' . implode(' | ', $err));
+                $sqlDeleteProjeto = "DELETE FROM projetos WHERE id = :id";
+                $stmtDeleteProjeto = $conexao->prepare($sqlDeleteProjeto);
+                $stmtDeleteProjeto->bindParam(':id', $id, PDO::PARAM_INT);
+
+                if ($stmtDeleteProjeto->execute()) {
+                    header('Location: index.php');
+                    exit();
+                } else {
+                    $err = $stmtDeleteProjeto->errorInfo();
+                    error_log('Erro ao executar DELETE: ' . implode(' | ', $err));
+                    header("HTTP/1.1 500 Internal Server Error");
+                    exit();
+                }
+            } catch (Exception $e) {
+                error_log('Erro ao deletar projeto: ' . $e->getMessage());
                 header("HTTP/1.1 500 Internal Server Error");
                 exit();
             }
-        } catch (Exception $e) {
-            error_log('Erro ao deletar projeto: ' . $e->getMessage());
-            header("HTTP/1.1 500 Internal Server Error");
-            exit();
         }
+    }
+
+    if ($_POST['acao'] === 'atualizar_status') {
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        $status = isset($_POST['status']) ? strtoupper(trim((string) $_POST['status'])) : '';
+
+        if ($id > 0 && in_array($status, $allowedProjectStatuses, true)) {
+            try {
+                $sqlUpdateStatus = "UPDATE projetos SET status = :status WHERE id = :id";
+                $stmtUpdateStatus = $conexao->prepare($sqlUpdateStatus);
+                $stmtUpdateStatus->bindParam(':status', $status, PDO::PARAM_STR);
+                $stmtUpdateStatus->bindParam(':id', $id, PDO::PARAM_INT);
+                $stmtUpdateStatus->execute();
+
+                echo json_encode(['ok' => true, 'status' => $status]);
+                exit();
+            } catch (Exception $e) {
+                error_log('Erro ao atualizar status do projeto: ' . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(['erro' => 'Erro interno']);
+                exit();
+            }
+        }
+
+        http_response_code(400);
+        echo json_encode(['erro' => 'Dados inválidos']);
+        exit();
     }
 }
 ?>
@@ -128,7 +155,7 @@ require_once "config/header.php";
                                             if (sizeof($result) > 0) {
                                                 for ($i = 0; $i < sizeof($result); $i++) { ?>
 
-                                                    <tr class="project-row" data-status="<?php echo htmlspecialchars(strtoupper((string) ($result[$i]['status'] ?? 'PENDENTE'))); ?>">
+                                                    <tr class="project-row" data-id="<?php echo (int) $result[$i]['id']; ?>" data-status="<?php echo htmlspecialchars(strtoupper((string) ($result[$i]['status'] ?? 'PENDENTE'))); ?>">
                                                         <td>
 
                                                             <?php
@@ -228,22 +255,24 @@ require_once "config/header.php";
                                                         <td>
                                                             <button
                                                                 type="button"
+                                                                class="btn btn-info btn-sm btn-atualizar-status-projeto"
+                                                                title="Alterar status"
+                                                                data-toggle="modal"
+                                                                data-target="#modalAtualizarStatusProjeto"
+                                                                data-id="<?php echo (int) $result[$i]['id']; ?>"
+                                                                data-name="<?php echo htmlspecialchars($result[$i]['centro_Cust'] . ' ' . $result[$i]['cliente'] . ' ' . $result[$i]['nome_proj']); ?>"
+                                                                data-status="<?php echo htmlspecialchars(strtoupper((string) ($result[$i]['status'] ?? 'PENDENTE'))); ?>">
+                                                                <i class="fa fa-flag"></i>
+                                                                <span class="status-label" style="margin-left: 4px;"><?php echo htmlspecialchars(strtoupper((string) ($result[$i]['status'] ?? 'PENDENTE'))); ?></span>
+                                                            </button>
+                                                            <button
+                                                                type="button"
                                                                 class="btn btn-danger btn-sm btn-excluir-projeto"
                                                                 title="Excluir"
                                                                 data-toggle="modal"
                                                                 data-target="#modalExcluirProjeto"
-                                                                data-id="<?php echo $result[$i]['id']; ?>"
-                                                                data-name="
-                                                            <?php
-
-                                                            echo $result[$i]['centro_Cust'] .
-                                                                " " .
-                                                                $result[$i]['cliente'] .
-                                                                " " .
-                                                                $result[$i]['nome_proj'];
-
-                                                            ?>
-                                                             ">
+                                                                data-id="<?php echo (int) $result[$i]['id']; ?>"
+                                                                data-name="<?php echo htmlspecialchars($result[$i]['centro_Cust'] . ' ' . $result[$i]['cliente'] . ' ' . $result[$i]['nome_proj']); ?>">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
                                                         </td>
@@ -305,6 +334,32 @@ require_once "config/header.php";
                     </div>
                 </div>
 
+                <div class="modal fade" id="modalAtualizarStatusProjeto" tabindex="-1" role="dialog" aria-labelledby="modalAtualizarStatusProjetoLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalAtualizarStatusProjetoLabel">Definir status do projeto</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Selecione o novo status para <strong id="nomeProjetoStatus"></strong>:</p>
+                                <select class="form-control" id="selectStatusProjeto">
+                                    <option value="EM-ANDAMENTO">EM-ANDAMENTO</option>
+                                    <option value="FINALIZADO">FINALIZADO</option>
+                                    <option value="EM-ANALISE">EM-ANALISE</option>
+                                    <option value="PENDENTE">PENDENTE</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="confirmarStatusProjeto">Confirmar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <?php
                 require_once "config/scripts.php";
                 ?>
@@ -319,9 +374,78 @@ require_once "config/header.php";
                             botoesExcluir[i].addEventListener('click', function() {
                                 var id = this.getAttribute('data-id');
                                 var nome = this.getAttribute('data-name');
-                                console.log('Deletando projeto ID:', id, 'Nome:', nome);
                                 campoIdExcluir.value = id;
                                 nomeProjetoExcluir.textContent = nome;
+                            });
+                        }
+
+                        var botoesStatus = document.querySelectorAll('.btn-atualizar-status-projeto');
+                        var campoIdStatus = document.getElementById('idProjetoStatus');
+                        var nomeProjetoStatus = document.getElementById('nomeProjetoStatus');
+                        var selectStatusProjeto = document.getElementById('selectStatusProjeto');
+                        var confirmarStatusProjeto = document.getElementById('confirmarStatusProjeto');
+                        var projetoAtualId = null;
+
+                        for (var j = 0; j < botoesStatus.length; j++) {
+                            botoesStatus[j].addEventListener('click', function() {
+                                projetoAtualId = this.getAttribute('data-id');
+                                var nome = this.getAttribute('data-name');
+                                var statusAtual = this.getAttribute('data-status') || 'PENDENTE';
+                                nomeProjetoStatus.textContent = nome;
+                                if (selectStatusProjeto) {
+                                    selectStatusProjeto.value = statusAtual;
+                                }
+                            });
+                        }
+
+                        if (confirmarStatusProjeto && selectStatusProjeto) {
+                            confirmarStatusProjeto.addEventListener('click', function() {
+                                if (!projetoAtualId) {
+                                    return;
+                                }
+
+                                var statusSelecionado = selectStatusProjeto.value;
+
+                                fetch('index.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                                    },
+                                    body: new URLSearchParams({
+                                        acao: 'atualizar_status',
+                                        id: projetoAtualId,
+                                        status: statusSelecionado
+                                    })
+                                })
+                                .then(function(response) {
+                                    return response.json();
+                                })
+                                .then(function(data) {
+                                    if (data.ok) {
+                                        var linhaProjeto = document.querySelector('.project-row[data-id="' + projetoAtualId + '"]');
+                                        if (linhaProjeto) {
+                                            linhaProjeto.setAttribute('data-status', statusSelecionado);
+                                        }
+
+                                        var botaoStatus = document.querySelector('.btn-atualizar-status-projeto[data-id="' + projetoAtualId + '"]');
+                                        if (botaoStatus) {
+                                            botaoStatus.setAttribute('data-status', statusSelecionado);
+                                            var labelStatus = botaoStatus.querySelector('.status-label');
+                                            if (labelStatus) {
+                                                labelStatus.textContent = statusSelecionado;
+                                            }
+                                        }
+
+                                        if (window.jQuery) {
+                                            jQuery('#modalAtualizarStatusProjeto').modal('hide');
+                                        }
+                                    } else {
+                                        alert('Não foi possível atualizar o status do projeto.');
+                                    }
+                                })
+                                .catch(function() {
+                                    alert('Erro ao atualizar o status do projeto.');
+                                });
                             });
                         }
                     })();
