@@ -275,6 +275,11 @@ require_once "config/header.php";
                                                                 data-name="<?php echo htmlspecialchars($result[$i]['centro_Cust'] . ' ' . $result[$i]['cliente'] . ' ' . $result[$i]['nome_proj']); ?>">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
+
+                                                            <a href="editar_projeto.php?id=<?php echo (int) $result[$i]['id']; ?>" class="btn btn-info btn-sm" title="Editar">
+                                                                <i class="fa fa-pencil"></i>
+                                                            </a>
+
                                                         </td>
                                                     </tr>
                                                 <?php }
