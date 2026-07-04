@@ -1,0 +1,9 @@
+# Ignore database credentials and environment files
+/config/conexao.php
+.env
+*.env
+
+# Optional common ignores
+/vendor/
+/node_modules/
+.DS_Store
