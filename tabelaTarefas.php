@@ -1,8 +1,10 @@
 <?php
 require_once "config/conexao.php";
+date_default_timezone_set('America/Sao_Paulo');
 
 $allowedStatuses = ['EM-EXECUCAO', 'CONCLUIDO', 'PENDENTE', ''];
 
+// Cria tabela de comentários se ainda não existir 
 $conexao->exec("CREATE TABLE IF NOT EXISTS comentarios (
     comentario TEXT NOT NULL,
     etapa VARCHAR(100) NOT NULL,
@@ -19,6 +21,9 @@ $etapa = isset($_GET['etapa']) ? trim($_GET['etapa']) : '';
 $result = [];
 $comentarios = [];
 
+
+
+// Criação de comentários de etapa 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $acao = isset($_POST['acao']) ? trim($_POST['acao']) : '';
 
@@ -51,6 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
+    // Edição de comentário
     if ($acao === 'editar-comentario') {
         $comentario = isset($_POST['comentario']) ? trim($_POST['comentario']) : '';
         $idProjComentario = isset($_POST['id_proj']) ? (int) $_POST['id_proj'] : 0;
@@ -75,6 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
+
+    // Exclusão de comentário
     if ($acao === 'excluir-comentario') {
         $comentario = isset($_POST['comentario']) ? trim($_POST['comentario']) : '';
         $idProjComentario = isset($_POST['id_proj']) ? (int) $_POST['id_proj'] : 0;
@@ -97,17 +105,36 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
+    // Pega o id da tarefa para executar a atualização
     $taskId = isset($_POST['taskId']) ? (int) $_POST['taskId'] : 0;
     $status = isset($_POST['status']) ? trim($_POST['status']) : '';
 
     $status = strtoupper(trim($status));
 
+    // Ao mudar status da tarefa o script JS no final do body captura a chamada e requisita a URL (GET) passando o status da tarefa e id dela como parâmetros, ao refresh da página os parâmetros são capturados aqui
     if ($taskId > 0 && in_array($status, $allowedStatuses, true)) {
+        $dataAtual = date("d/m/Y H:i:s");
+
+
         $sqlUpdate = "UPDATE tarefas SET status = :status WHERE id = :id";
         $stmtUpdate = $conexao->prepare($sqlUpdate);
         $stmtUpdate->bindParam(':status', $status, PDO::PARAM_STR);
         $stmtUpdate->bindParam(':id', $taskId, PDO::PARAM_INT);
         $stmtUpdate->execute();
+
+            if ($status == "EM-EXECUCAO"){
+                    $sqlUpdate = "UPDATE tarefas SET DtHr_Inicio = :dthrInic WHERE id = :id";
+                    $stmtUpdate = $conexao->prepare($sqlUpdate);
+                    $stmtUpdate->bindParam(':dthrInic', $dataAtual, PDO::PARAM_STR);
+                    $stmtUpdate->bindParam(':id', $taskId, PDO::PARAM_INT);
+                    $stmtUpdate->execute();
+            } elseif ($status == "CONCLUIDO"){
+                    $sqlUpdate = "UPDATE tarefas SET DtHr_concluido = :dthrConc WHERE id = :id";
+                    $stmtUpdate = $conexao->prepare($sqlUpdate);
+                    $stmtUpdate->bindParam(':dthrConc', $dataAtual, PDO::PARAM_STR);
+                    $stmtUpdate->bindParam(':id', $taskId, PDO::PARAM_INT);
+                    $stmtUpdate->execute();
+            } 
 
         echo json_encode(['ok' => true]);
     } else {
@@ -125,7 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
         exit;
     }
 
-    $sql = "SELECT A.id, A.tarefa, A.etapa, A.area, A.status, B.nome_proj
+    $sql = "SELECT A.id, A.tarefa, A.etapa, A.area, A.DtHr_Inicio, A.DtHr_concluido, A.status, B.nome_proj
             FROM tarefas AS A
             JOIN projetos AS B ON A.id_proj = B.id
             WHERE B.id = :id AND A.etapa = :etapa";
@@ -271,6 +298,8 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
                         <tr>
                             <th>Area</th>
                             <th>Atividade</th>
+                            <th>Data e Hora de Início</th>
+                            <th>Data e Hora de Término</th>                        
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -290,8 +319,10 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
                                 <tr class="alert <?php echo $rowClass; ?> task-row" data-status="<?php echo htmlspecialchars($status); ?>" role="alert" style="padding: 15px 0; line-height: 1.8;">
                                     <td style="vertical-align: middle;"><?php echo htmlspecialchars($row['area'] ?? ''); ?></td>
                                     <td style="vertical-align: middle;"><?php echo htmlspecialchars($row['tarefa'] ?? ''); ?></td>
+                                    <td style="vertical-align: middle;"><?php echo htmlspecialchars($row['DtHr_Inicio'] ?? ''); ?></td>
+                                    <td style="vertical-align: middle;"><?php echo htmlspecialchars($row['DtHr_concluido'] ?? ''); ?></td>
                                     <td style="vertical-align: middle;">
-                                        <select class="form-control status-select" data-task-id="<?php echo (int) $row['id']; ?>" onchange="atualizarStatus(this)">
+                                        <select <?php if ($row['status'] == "CONCLUIDO"){echo "disabled";}?> id="status-select" class="form-control status-select" data-task-id="<?php echo (int) $row['id']; ?>" onchange="atualizarStatus(this)">
                                             <option value="PENDENTE" <?php echo ($status === 'PENDENTE') ? 'selected' : ''; ?>>PENDENTE</option>
                                             <option value="EM-EXECUCAO" <?php echo ($status === 'EM-EXECUCAO') ? 'selected' : ''; ?>>EM-EXECUCAO</option>
                                             <option value="CONCLUIDO" <?php echo ($status === 'CONCLUIDO') ? 'selected' : ''; ?>>CONCLUIDO</option>

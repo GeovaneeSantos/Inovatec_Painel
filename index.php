@@ -19,6 +19,25 @@ function getStageProgress($conexao, $projectId, $stageName)
     return round(($concluidas / $total) * 100);
 }
 
+function getExecStageProgress($conexao, $projectId, $stageName)
+{
+    $sql = "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'EM-EXECUCAO' THEN 1 ELSE 0 END) as executando FROM tarefas WHERE id_proj = :id AND etapa = :etapa";
+    $stmt = $conexao->prepare($sql);
+    $stmt->bindParam(':id', $projectId, PDO::PARAM_INT);
+    $stmt->bindParam(':etapa', $stageName, PDO::PARAM_STR);
+    $stmt->execute();
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $total = (int) ($data['total'] ?? 0);
+    $executando = (int) ($data['executando'] ?? 0);
+
+    if ($total === 0) {
+        return 0;
+    }
+
+    return round(($executando / $total) * 100);
+}
+
 $sql = "SELECT * FROM projetos ORDER BY id";
 $stmtSelect = $conexao->prepare($sql);
 $stmtSelect->execute();
@@ -132,13 +151,13 @@ require_once "config/header.php";
                                     <table class="table table-hover ">
                                         <thead>
                                             <tr>
-                                                <th>Nome do Projeto</th>
-                                                <th>#</th>
-                                                <th>INICIO DO PROJETO</th>
-                                                <th>PRODUÇÃO</th>
-                                                <th>SOFTWARE E TESTES</th>
-                                                <th>FINALIZAÇÃO E ENTREGA</th>
-                                                <th>Data Limite</th>
+                                                <th class="text-center align-middle">Nome do Projeto</th>
+                                                <th class="text-center align-middle">#</th>
+                                                <th class="text-center align-middle">INICIO DO PROJETO</th>
+                                                <th class="text-center align-middle">PRODUÇÃO</th>
+                                                <th class="text-center align-middle">SOFTWARE E TESTES</th>
+                                                <th class="text-center align-middle">FINALIZAÇÃO E ENTREGA</th>
+                                                <th class="text-center align-middle">Data Limite</th>
                                                 <th>
                                                     <div class="col-sm-12 col-12 text-center gap-2 d-grid">
                                                         <a href="novoProjeto.php" class="btn btn-success btn-sm">
@@ -156,24 +175,25 @@ require_once "config/header.php";
                                                 for ($i = 0; $i < sizeof($result); $i++) { ?>
 
                                                     <tr class="project-row" data-id="<?php echo (int) $result[$i]['id']; ?>" data-status="<?php echo htmlspecialchars(strtoupper((string) ($result[$i]['status'] ?? 'PENDENTE'))); ?>">
-                                                        <td>
-
-                                                            <?php
-                                                            echo $result[$i]['centro_Cust'] .
-                                                                " " .
-                                                                $result[$i]['cliente'] .
-                                                                " " .
-                                                                $result[$i]['nome_proj'];
-
-                                                            ?>
-
+                                                        <td class="text-center align-middle">
+                                                                <p class="fs-6">
+                                                                    <?php
+                                                                    echo $result[$i]['centro_Cust'] .
+                                                                        " " .
+                                                                        $result[$i]['cliente'] .
+                                                                        " " .
+                                                                        $result[$i]['nome_proj'];
+                                                                    ?>
+                                                                </p>
                                                         </td>
-                                                        <th scope="row">
-                                                            <?php
-                                                            echo $i;
-                                                            ?>
+                                                        <th scope="row" class="text-center align-middle">
+                                                            <p class="fs-6">
+                                                                <?php
+                                                                echo $i;
+                                                                ?>
+                                                            </p>
                                                         </th>
-                                                        <td>
+                                                        <td class="text-left align-middle">
                                                             <a href="tabelaTarefas.php?<?= http_build_query([
                                                                                             'idProj' => $result[$i]['id'],
                                                                                             'nomeProj' => $result[$i]['nome_proj'],
@@ -182,16 +202,25 @@ require_once "config/header.php";
                                                                                             'etapa' => 'INICIAL'
                                                                                         ]) ?>">
                                                                 <div style="cursor: pointer" id="teste">
-                                                                    <?php $progressInicial = getStageProgress($conexao, $result[$i]['id'], 'INICIAL'); ?>
-                                                                    <div class="progress progress_sm" style="width: 70%;">
+                                                                    <?php $progressInicial = getStageProgress($conexao, $result[$i]['id'], 'INICIAL');
+                                                                          $progressExecInicial = getExecStageProgress($conexao, $result[$i]['id'], 'INICIAL');
+                                                                    ?>
+                                                                    
+                                                                    <span style="font-size: 12px;">Concluído: <?php echo $progressInicial; ?>%</span>
+                                                                    <div class="progress progress_sm align-center" style="width: 100%;">
                                                                         <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="<?php echo $progressInicial; ?>" style="width: <?php echo $progressInicial; ?>%;"></div>
                                                                     </div>
-                                                                    <span style="font-size: 12px;"><?php echo $progressInicial; ?>%</span>
+                                                                    
+                                                                    <span style="font-size: 12px;">Executando: <?php echo $progressExecInicial; ?>%</span>
+                                                                    <div class="progress progress_sm" style="width: 100%;">
+                                                                        <div class="progress-bar bg-blue" role="progressbar" data-transitiongoal="<?php echo $progressExecInicial; ?>" style="width: <?php echo $progressExecInicial; ?>%;"></div>
+                                                                    </div>
+
                                                                 </div>
                                                             </a>
                                                         </td>
 
-                                                        <td>
+                                                        <td class="text-left align-middle">
                                                             <a href="tabelaTarefas.php?<?= http_build_query([
                                                                                             'idProj' => $result[$i]['id'],
                                                                                             'nomeProj' => $result[$i]['nome_proj'],
@@ -200,16 +229,25 @@ require_once "config/header.php";
                                                                                             'etapa' => 'PRODUCAO'
                                                                                         ]) ?>">
                                                                 <div style="cursor: pointer" id="teste">
-                                                                    <?php $progressProducao = getStageProgress($conexao, $result[$i]['id'], 'PRODUCAO'); ?>
-                                                                    <div class="progress progress_sm" style="width: 70%;">
+                                                                    <?php $progressProducao = getStageProgress($conexao, $result[$i]['id'], 'PRODUCAO');
+                                                                        $progressExecProducao = getExecStageProgress($conexao, $result[$i]['id'], 'PRODUCAO');  
+                                                                    ?>
+                                                                    
+                                                                    <span style="font-size: 12px;">Concluído: <?php echo $progressProducao; ?>%</span>
+                                                                    <div class="progress progress_sm" style="width: 100%;">
                                                                         <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="<?php echo $progressProducao; ?>" style="width: <?php echo $progressProducao; ?>%;"></div>
                                                                     </div>
-                                                                    <span style="font-size: 12px;"><?php echo $progressProducao; ?>%</span>
+
+                                                                    <span style="font-size: 12px;">Executando: <?php echo $progressExecProducao; ?>%</span>
+                                                                    <div class="progress progress_sm" style="width: 100%;">
+                                                                        <div class="progress-bar bg-blue" role="progressbar" data-transitiongoal="<?php echo $progressExecProducao; ?>" style="width: <?php echo $progressExecProducao; ?>%;"></div>
+                                                                    </div>
+
                                                                 </div>
                                                             </a>
                                                         </td>
 
-                                                        <td>
+                                                        <td class="text-left align-middle">
                                                             <a href="tabelaTarefas.php?<?= http_build_query([
                                                                                             'idProj' => $result[$i]['id'],
                                                                                             'nomeProj' => $result[$i]['nome_proj'],
@@ -218,16 +256,24 @@ require_once "config/header.php";
                                                                                             'etapa' => 'SOFTWARE'
                                                                                         ]) ?>">
                                                                 <div style="cursor: pointer" id="teste">
-                                                                    <?php $progressSoftware = getStageProgress($conexao, $result[$i]['id'], 'SOFTWARE'); ?>
-                                                                    <div class="progress progress_sm" style="width: 70%;">
+                                                                    <?php $progressSoftware = getStageProgress($conexao, $result[$i]['id'], 'SOFTWARE');
+                                                                          $progressExecSoftware = getExecStageProgress($conexao, $result[$i]['id'], 'SOFTWARE');  ?>
+                                                                    
+                                                                    <span style="font-size: 12px;">Concluído: <?php echo $progressSoftware; ?>%</span>
+                                                                    <div class="progress progress_sm" style="width: 100%;">
                                                                         <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="<?php echo $progressSoftware; ?>" style="width: <?php echo $progressSoftware; ?>%;"></div>
                                                                     </div>
-                                                                    <span style="font-size: 12px;"><?php echo $progressSoftware; ?>%</span>
+
+                                                                    <span style="font-size: 12px;">Executando:<?php echo $progressExecSoftware; ?>%</span>
+                                                                    <div class="progress progress_sm" style="width: 100%;">
+                                                                        <div class="progress-bar bg-blue" role="progressbar" data-transitiongoal="<?php echo $progressExecSoftware; ?>" style="width: <?php echo $progressExecSoftware; ?>%;"></div>
+                                                                    </div>
+
                                                                 </div>
                                                             </a>
                                                         </td>
 
-                                                        <td>
+                                                        <td class="text-left align-middle">
                                                             <a href="tabelaTarefas.php?<?= http_build_query([
                                                                                             'idProj' => $result[$i]['id'],
                                                                                             'nomeProj' => $result[$i]['nome_proj'],
@@ -236,23 +282,34 @@ require_once "config/header.php";
                                                                                             'etapa' => 'FINALIZACAO'
                                                                                         ]) ?>">
                                                                 <div style="cursor: pointer" id="teste">
-                                                                    <?php $progressFinalizacao = getStageProgress($conexao, $result[$i]['id'], 'FINALIZACAO'); ?>
-                                                                    <div class="progress progress_sm" style="width: 70%;">
-                                                                        <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="<?php echo $progressFinalizacao; ?>" style="width: <?php echo $progressFinalizacao; ?>%;"></div>
+                                                                    <?php $progressFinalizacao = getStageProgress($conexao, $result[$i]['id'], 'FINALIZACAO');
+                                                                          $progressExecFinalizacao = getExecStageProgress($conexao, $result[$i]['id'], 'FINALIZACAO'); 
+                                                                    ?>
+
+                                                                    <span style="font-size: 12px;">Concluído: <?php echo $progressFinalizacao; ?>%</span>
+                                                                    <div class="progress progress_sm" style="width: 100%;">
+                                                                        <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="<?php echo $progressFinalizacao; ?>" style="width: <?php echo $progressFinalizacao; ?>%;"></div>  
                                                                     </div>
-                                                                    <span style="font-size: 12px;"><?php echo $progressFinalizacao; ?>%</span>
+                                                                    
+                                                                        
+                                                                    <span style="font-size: 12px;">Executando: <?php echo $progressExecFinalizacao; ?>%</span>
+                                                                    <div class="progress progress_sm" style="width: 100%;">
+                                                                        <div class="progress-bar bg-blue" role="progressbar" data-transitiongoal="<?php echo $progressExecFinalizacao; ?>" style="width: <?php echo $progressExecFinalizacao; ?>%;"></div>
+                                                                    </div>
+                                                                
+                                                                    
                                                                 </div>
                                                             </a>
                                                         </td>
 
-                                                        <td>
+                                                        <td class="text-center align-middle">
                                                             <span>
                                                                 <?php
                                                                 echo $result[$i]['dt_termino'];
                                                                 ?>
                                                             </span>
                                                         </td>
-                                                        <td>
+                                                        <td class="text-right align-middle">
                                                             <button
                                                                 type="button"
                                                                 class="btn btn-info btn-sm btn-atualizar-status-projeto"
@@ -286,7 +343,7 @@ require_once "config/header.php";
                                             } else {
                                                 ?>
                                                 <tr>
-                                                    <td colspan="6" class="text-center">Nenhum projeto cadastrado.</td>
+                                                    <td colspan="12" class="text-center">Nenhum projeto cadastrado.</td>
                                                 </tr>
 
                                             <?php

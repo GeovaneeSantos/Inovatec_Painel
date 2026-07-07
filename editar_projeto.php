@@ -161,9 +161,9 @@ require_once "config/header.php";
                                                     </div>
 
                                                     <div class="form-group row">
-                                                        <label class="control-label col-md-3 col-sm-3 col-12" for="dataPrev">Data Prevista</label>
+                                                        <label class="control-label col-md-3 col-sm-3 col-12" for="dataPrev">Primeira Data Prevista</label>
                                                         <div class="col-md-6 col-sm-9 col-12">
-                                                            <input type="text" class="form-control"
+                                                            <input disabled type="text" class="form-control"
                                                                 data-inputmask="'mask': '99/99/9999'" name="dataPrev" id="dataPrev" value="<?php echo htmlspecialchars($dataPrev, ENT_QUOTES, 'UTF-8'); ?>">
                                                             <span class="fa fa-user form-control-feedback right"
                                                                 aria-hidden="true"></span>
