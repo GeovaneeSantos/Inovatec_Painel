@@ -43,4 +43,5 @@ if (!isset($_SESSION['user_name']) && basename($_SERVER['SCRIPT_NAME']) != "logi
     <link href="css/bootstrap-datetimepicker.css" rel="stylesheet">
     <link href="css/normalize.css" rel="stylesheet">
     <link href="css/cropper.min.css" rel="stylesheet">
+    
 </head>

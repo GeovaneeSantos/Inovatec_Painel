@@ -1,7 +1,6 @@
 <?php
 require_once "config/conexao.php";
 date_default_timezone_set('America/Sao_Paulo');
-
 $allowedStatuses = ['EM-EXECUCAO', 'CONCLUIDO', 'PENDENTE', ''];
 
 // Cria tabela de comentários se ainda não existir 
@@ -9,7 +8,9 @@ $conexao->exec("CREATE TABLE IF NOT EXISTS comentarios (
     comentario TEXT NOT NULL,
     etapa VARCHAR(100) NOT NULL,
     id_proj INT NOT NULL,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user VARCHAR(100)
 )");
 
 $idProjeto = isset($_GET['idProj']) ? trim($_GET['idProj']) : '';
@@ -17,6 +18,7 @@ $centroCust = isset($_GET['centroCust']) ? trim($_GET['centroCust']) : '';
 $nomeDoProjeto = isset($_GET['nomeProj']) ? trim($_GET['nomeProj']) : '';
 $cliente = isset($_GET['cliente']) ? trim($_GET['cliente']) : '';
 $etapa = isset($_GET['etapa']) ? trim($_GET['etapa']) : '';
+
 
 $result = [];
 $comentarios = [];
@@ -31,18 +33,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $comentario = isset($_POST['comentario']) ? trim($_POST['comentario']) : '';
         $idProjComentario = isset($_POST['id_proj']) ? (int) $_POST['id_proj'] : 0;
         $etapaComentario = isset($_POST['etapa']) ? trim($_POST['etapa']) : '';
-
+        $usuario = isset($_SESSION['user_name']) ? trim($_SESSION['user_name']) : '';
+        
         if ($comentario === '' || $idProjComentario <= 0 || $etapaComentario === '') {
             http_response_code(400);
             echo json_encode(['erro' => 'Dados inválidos para criar comentário']);
             exit;
         }
 
-        $sqlInsert = "INSERT INTO comentarios (comentario, etapa, id_proj) VALUES (:comentario, :etapa, :id_proj)";
+        $sqlInsert = "INSERT INTO comentarios (comentario, etapa, id_proj, user) VALUES (:comentario, :etapa, :id_proj, :user)";
         $stmtInsert = $conexao->prepare($sqlInsert);
         $stmtInsert->bindParam(':comentario', $comentario, PDO::PARAM_STR);
         $stmtInsert->bindParam(':etapa', $etapaComentario, PDO::PARAM_STR);
         $stmtInsert->bindParam(':id_proj', $idProjComentario, PDO::PARAM_INT);
+        $stmtInsert->bindParam(':user', $usuario, PDO::PARAM_STR);
         $stmtInsert->execute();
 
         echo json_encode([
@@ -171,8 +175,6 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 }
 
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">

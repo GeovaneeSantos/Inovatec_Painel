@@ -38,6 +38,51 @@ function getExecStageProgress($conexao, $projectId, $stageName)
     return round(($executando / $total) * 100);
 }
 
+function getDeadlineClass($conexao, array $project)
+{
+    $deadline = '';
+
+    if ((int) ($project['dataNova'] ?? 0) === 1) {
+        $sqlDataAlterada = "SELECT novaData FROM dtaltproj WHERE idProj = :idProj ORDER BY id DESC LIMIT 1";
+        $stmtDataAlterada = $conexao->prepare($sqlDataAlterada);
+        $stmtDataAlterada->bindParam(':idProj', $project['id'], PDO::PARAM_INT);
+        $stmtDataAlterada->execute();
+        $data = $stmtDataAlterada->fetch(PDO::FETCH_ASSOC);
+
+        if ($data && isset($data['novaData'])) {
+            $deadline = trim((string) $data['novaData']);
+        }
+    }
+
+    if ($deadline === '') {
+        $deadline = trim((string) ($project['dt_termino'] ?? ''));
+    }
+
+    if ($deadline === '') {
+        return '';
+    }
+
+    $deadlineDate = DateTime::createFromFormat('d/m/Y', $deadline);
+    if ($deadlineDate === false) {
+        return '';
+    }
+
+    $deadlineDate->setTime(0, 0, 0);
+    $hoje = new DateTime();
+    $hoje->setTime(0, 0, 0);
+
+    if ($deadlineDate < $hoje) {
+        return 'bg-danger';
+    }
+
+    $interval = $hoje->diff($deadlineDate);
+    if ($interval->days <= 7) {
+        return 'bg-warning';
+    }
+
+    return '';
+}
+
 $sql = "SELECT * FROM projetos ORDER BY id";
 $stmtSelect = $conexao->prepare($sql);
 $stmtSelect->execute();
@@ -62,6 +107,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
                 $stmtDeleteTarefas = $conexao->prepare($sqlDeleteTarefas);
                 $stmtDeleteTarefas->bindParam(':id', $id, PDO::PARAM_INT);
                 $stmtDeleteTarefas->execute();
+
+                $sqlDeleteDatas = "DELETE FROM dtaltproj WHERE idProj = :id";
+                $stmtDeleteDatas = $conexao->prepare($sqlDeleteDatas);
+                $stmtDeleteDatas->bindParam(":id", $id, PDO::PARAM_INT);
+                $stmtDeleteDatas->execute();
 
                 $sqlDeleteProjeto = "DELETE FROM projetos WHERE id = :id";
                 $stmtDeleteProjeto = $conexao->prepare($sqlDeleteProjeto);
@@ -166,7 +216,6 @@ require_once "config/header.php";
                                                     </div>
                                                 </th>
                                             </tr>
-
                                         </thead>
                                         <tbody>
                                             <?php
@@ -175,16 +224,17 @@ require_once "config/header.php";
                                                 for ($i = 0; $i < sizeof($result); $i++) { ?>
 
                                                     <tr class="project-row" data-id="<?php echo (int) $result[$i]['id']; ?>" data-status="<?php echo htmlspecialchars(strtoupper((string) ($result[$i]['status'] ?? 'PENDENTE'))); ?>">
-                                                        <td class="text-center align-middle">
-                                                                <p class="fs-6">
-                                                                    <?php
-                                                                    echo $result[$i]['centro_Cust'] .
-                                                                        " " .
-                                                                        $result[$i]['cliente'] .
-                                                                        " " .
-                                                                        $result[$i]['nome_proj'];
-                                                                    ?>
-                                                                </p>
+                                                        <?php $deadlineClass = getDeadlineClass($conexao, $result[$i]); ?>
+                                                        <td class="text-center align-middle <?php echo htmlspecialchars($deadlineClass, ENT_QUOTES); ?>">
+                                                            <p class="fs-6">
+                                                                <?php
+                                                                echo $result[$i]['centro_Cust'] .
+                                                                    " " .
+                                                                    $result[$i]['cliente'] .
+                                                                    " " .
+                                                                    $result[$i]['nome_proj'];
+                                                                ?>
+                                                            </p>
                                                         </td>
                                                         <th scope="row" class="text-center align-middle">
                                                             <p class="fs-6">
@@ -264,7 +314,7 @@ require_once "config/header.php";
                                                                         <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="<?php echo $progressSoftware; ?>" style="width: <?php echo $progressSoftware; ?>%;"></div>
                                                                     </div>
 
-                                                                    <span style="font-size: 12px;">Executando:<?php echo $progressExecSoftware; ?>%</span>
+                                                                    <span style="font-size: 12px;">Executando: <?php echo $progressExecSoftware; ?>%</span>
                                                                     <div class="progress progress_sm" style="width: 100%;">
                                                                         <div class="progress-bar bg-blue" role="progressbar" data-transitiongoal="<?php echo $progressExecSoftware; ?>" style="width: <?php echo $progressExecSoftware; ?>%;"></div>
                                                                     </div>
@@ -303,11 +353,30 @@ require_once "config/header.php";
                                                         </td>
 
                                                         <td class="text-center align-middle">
-                                                            <span>
+                                                            <p class="fs-6">
+
                                                                 <?php
-                                                                echo $result[$i]['dt_termino'];
+                                                                $dataProj = "";
+
+                                                                if ($result[$i]['dataNova'] == 0){
+
+                                                                    $dataProj = $result[$i]['dt_termino'];
+
+                                                                }else if ($result[$i]['dataNova'] == 1){
+                                                                    $idProjSelect = $result[$i]['id'];
+                                                                    $sqlDataAlterada = "SELECT novaData FROM dtaltproj WHERE idProj = :idProj ORDER BY id DESC";
+                                                                    $stmtDataAlterada  = $conexao->prepare($sqlDataAlterada);
+                                                                    $stmtDataAlterada -> bindParam(":idProj", $idProjSelect, PDO::PARAM_INT);
+                                                                    $stmtDataAlterada->execute();
+                                                                    $data = $stmtDataAlterada->fetchAll();
+                        
+                                                                    $dataProj = $data[0]['novaData'];
+                                                                }  
+                                                                echo $dataProj;
                                                                 ?>
-                                                            </span>
+
+
+                                                            </p>
                                                         </td>
                                                         <td class="text-right align-middle">
                                                             <button
