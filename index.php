@@ -424,7 +424,7 @@ require_once "config/header.php";
                                     <!-- footer content -->
                                     <footer class="col-md-12">
                                         <div class="pull-right">
-                                            Inovatec Automação Industrial - <a href="https://inovatecautomacao.com.br/">Inovatec</a>
+                                            Inovatec Automação Industrial - <a href="mailto:geovane.geors@gmail.com">Suporte</a>
                                         </div>
                                         <div class="clearfix"></div>
                                     </footer>
@@ -478,9 +478,7 @@ require_once "config/header.php";
                                 <p>Selecione o novo status para <strong id="nomeProjetoStatus"></strong>:</p>
                                 <select class="form-control" id="selectStatusProjeto">
                                     <option value="EM-ANDAMENTO">EM-ANDAMENTO</option>
-                                    <option value="FINALIZADO">FINALIZADO</option>
-                                    <option value="EM-ANALISE">EM-ANALISE</option>
-                                    <option value="PENDENTE">PENDENTE</option>
+                                    <option value="EM-ANALISE">PAUSADO</option>
                                 </select>
                             </div>
                             <div class="modal-footer">

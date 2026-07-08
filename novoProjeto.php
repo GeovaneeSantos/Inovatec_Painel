@@ -97,7 +97,7 @@ require_once "config/header.php";
                         <!-- footer content -->
                         <footer class="col-md-12">
                             <div class="pull-right">
-                                Inovatec Automação Industrial - <a href="https://inovatecautomacao.com.br/">Inovatec</a>
+                                Inovatec Automação Industrial - <a href="mailto:geovane.geors@gmail.com">Suporte</a>
                             </div>
                             <div class="clearfix"></div>
                         </footer>

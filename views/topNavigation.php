@@ -4,17 +4,17 @@
              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 0;">
 
                  <div class="btn-group btn-group-sm" role="group" aria-label="Filtro de status" style="display: flex; align-items: center;">
+                     <label class="btn btn-default active project-filter-label" data-status="PENDENTE" style="padding: 2px 8px; line-height: 1.2; border-color: #d9534f; color: #a94442;">
+                         <input type="checkbox" class="project-status-filter" value="PENDENTE" checked style="margin-right: 4px;"> PENDENTE
+                     </label>
+                     <label class="btn btn-default active project-filter-label" data-status="EM-ANALISE" style="padding: 2px 8px; line-height: 1.2; border-color: #5bc0de; color: #31708f;">
+                         <input type="checkbox" class="project-status-filter" value="EM-ANALISE" checked style="margin-right: 4px;"> PAUSADO
+                     </label>
                      <label class="btn btn-default active project-filter-label" data-status="EM-ANDAMENTO" style="padding: 2px 8px; line-height: 1.2; border-color: #f0ad4e; color: #8a6d3b;">
                          <input type="checkbox" class="project-status-filter" value="EM-ANDAMENTO" checked style="margin-right: 4px;"> EM-ANDAMENTO
                      </label>
                      <label class="btn btn-default active project-filter-label" data-status="FINALIZADO" style="padding: 2px 8px; line-height: 1.2; border-color: #5cb85c; color: #3c763d;">
                          <input type="checkbox" class="project-status-filter" value="FINALIZADO" checked style="margin-right: 4px;"> FINALIZADO
-                     </label>
-                     <label class="btn btn-default active project-filter-label" data-status="EM-ANALISE" style="padding: 2px 8px; line-height: 1.2; border-color: #5bc0de; color: #31708f;">
-                         <input type="checkbox" class="project-status-filter" value="EM-ANALISE" checked style="margin-right: 4px;"> EM-ANALISE
-                     </label>
-                     <label class="btn btn-default active project-filter-label" data-status="PENDENTE" style="padding: 2px 8px; line-height: 1.2; border-color: #d9534f; color: #a94442;">
-                         <input type="checkbox" class="project-status-filter" value="PENDENTE" checked style="margin-right: 4px;"> PENDENTE
                      </label>
                  </div>
              </div>
