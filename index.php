@@ -108,7 +108,7 @@ $stmtSelect = $conexao->prepare($sql);
 $stmtSelect->execute();
 $result = $stmtSelect->fetchAll();
 
-$allowedProjectStatuses = ['EM-ANDAMENTO', 'FINALIZADO', 'EM-ANALISE', 'PENDENTE'];
+$allowedProjectStatuses = ['EM-ANDAMENTO', 'FINALIZADO', 'PAUSADO', 'PENDENTE'];
 
 //Atualização de Status e Exclusão de Projetos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
@@ -185,11 +185,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
 
 //Verifica se eas etapas estão todas concluídas e se estiverem muda o projeto para finalizado
 for ($i = 0; $i < sizeof($result); $i++) {
-    if (getProjectProgress($conexao, $result[$i]['id']) == 100){
+    if ((getProjectProgress($conexao, $result[$i]['id']) == 100) AND (strtoupper($result[$i]['status']) != 'FINALIZADO')){
+        $dataAtual = date("d/m/Y");
         $id = $result[$i]['id'];
-        $sqlUpdateStatus = "UPDATE projetos SET status = 'FINALIZADO' WHERE id = :id";
+        $sqlUpdateStatus = "UPDATE projetos SET status = 'FINALIZADO', dt_Concluido = :dtConc WHERE id = :id";
         $stmtUpdateStatus = $conexao->prepare($sqlUpdateStatus);
         $stmtUpdateStatus->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmtUpdateStatus->bindParam(':dtConc', $dataAtual, PDO::PARAM_STR);        
         $stmtUpdateStatus->execute();
         header("Refresh: 5");
     };
@@ -386,10 +388,12 @@ require_once "config/header.php";
                                                         </td>
 
                                                         <td class="text-center align-middle">
+                                                            <!-- Data Limite do projeto (Deadline) -->
                                                             <p class="fs-6">
 
                                                                 <?php
                                                                 $dataProj = "";
+                                                                $alteracoes = "0";
 
                                                                 if ($result[$i]['dataNova'] == 0){
 
@@ -402,17 +406,33 @@ require_once "config/header.php";
                                                                     $stmtDataAlterada -> bindParam(":idProj", $idProjSelect, PDO::PARAM_INT);
                                                                     $stmtDataAlterada->execute();
                                                                     $data = $stmtDataAlterada->fetchAll();
-                        
                                                                     $dataProj = $data[0]['novaData'];
+                                                                    $alteracoes = count($data);
                                                                 }  
                                                                 echo $dataProj;
                                                                 ?>
 
 
                                                             </p>
+                                                            
+                                                            <?php if(strtoupper($result[$i]['status']) == "FINALIZADO"){ ?>
+                                                            <p class="fs-6">
+                                                                <?php
+                                                                    echo "Data de Conclusão: ";
+                                                                    echo $result[$i]['dt_Concluido'];
+                                                                    
+                                                                    ?>
+                                                            </p>
+                                                            <p class="fs-6">
+                                                            <?php
+                                                                echo $alteracoes." alterações";
+                                                            ?>
+                                                            </p>
+                                                            <?php } ?>
                                                         </td>
                                                         <td class="text-right align-middle">
                                                             <button
+                                                                <?php if(strtoupper($result[$i]['status']) == "FINALIZADO"){ echo htmlspecialchars("disabled");} ?>
                                                                 type="button"
                                                                 class="btn btn-info btn-sm btn-atualizar-status-projeto"
                                                                 title="Alterar status"
@@ -424,6 +444,7 @@ require_once "config/header.php";
                                                                 <i class="fa fa-flag"></i>
                                                                 <span class="status-label" style="margin-left: 4px;"><?php echo htmlspecialchars(strtoupper((string) ($result[$i]['status'] ?? 'PENDENTE'))); ?></span>
                                                             </button>
+                                                            
                                                             <button
                                                                 type="button"
                                                                 class="btn btn-danger btn-sm btn-excluir-projeto"
@@ -435,7 +456,15 @@ require_once "config/header.php";
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
 
-                                                            <a href="editar_projeto.php?id=<?php echo (int) $result[$i]['id']; ?>" class="btn btn-info btn-sm" title="Editar">
+                                                            <a href="editar_projeto.php?
+                                                                <?= http_build_query([
+                                                                    'id' => $result[$i]['id'],
+                                                                    'nomeProj' => $result[$i]['nome_proj'],
+                                                                    'cliente' => $result[$i]['cliente'],
+                                                                    'centroCust' => $result[$i]['centro_Cust'],
+                                                                    'status' => $result[$i]['status']
+                                                                ]) ?>
+                                                            " class="btn btn-info btn-sm" title="Editar">
                                                                 <i class="fa fa-pencil"></i>
                                                             </a>
 
@@ -467,7 +496,8 @@ require_once "config/header.php";
                         </div>
                     </div>
                 </div>
-
+                
+                <!-- Modal de exclusão do projeto -->
                 <div class="modal fade" id="modalExcluirProjeto" tabindex="-1" role="dialog" aria-labelledby="modalExcluirProjetorLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
@@ -497,7 +527,8 @@ require_once "config/header.php";
                         </div>
                     </div>
                 </div>
-
+                
+                <!-- Modal de status do projeto -->
                 <div class="modal fade" id="modalAtualizarStatusProjeto" tabindex="-1" role="dialog" aria-labelledby="modalAtualizarStatusProjetoLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
@@ -511,7 +542,7 @@ require_once "config/header.php";
                                 <p>Selecione o novo status para <strong id="nomeProjetoStatus"></strong>:</p>
                                 <select class="form-control" id="selectStatusProjeto">
                                     <option value="EM-ANDAMENTO">EM-ANDAMENTO</option>
-                                    <option value="EM-ANALISE">PAUSADO</option>
+                                    <option value="PAUSADO">PAUSADO</option>
                                 </select>
                             </div>
                             <div class="modal-footer">

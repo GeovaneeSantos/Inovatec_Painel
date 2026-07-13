@@ -7,8 +7,8 @@
                      <label class="btn btn-default active project-filter-label" data-status="PENDENTE" style="padding: 2px 8px; line-height: 1.2; border-color: #d9534f; color: #a94442;">
                          <input type="checkbox" class="project-status-filter" value="PENDENTE" checked style="margin-right: 4px;"> PENDENTE
                      </label>
-                     <label class="btn btn-default active project-filter-label" data-status="EM-ANALISE" style="padding: 2px 8px; line-height: 1.2; border-color: #5bc0de; color: #31708f;">
-                         <input type="checkbox" class="project-status-filter" value="EM-ANALISE" checked style="margin-right: 4px;"> PAUSADO
+                     <label class="btn btn-default active project-filter-label" data-status="PAUSADO" style="padding: 2px 8px; line-height: 1.2; border-color: #5bc0de; color: #31708f;">
+                         <input type="checkbox" class="project-status-filter" value="PAUSADO" checked style="margin-right: 4px;"> PAUSADO
                      </label>
                      <label class="btn btn-default active project-filter-label" data-status="EM-ANDAMENTO" style="padding: 2px 8px; line-height: 1.2; border-color: #f0ad4e; color: #8a6d3b;">
                          <input type="checkbox" class="project-status-filter" value="EM-ANDAMENTO" checked style="margin-right: 4px;"> EM-ANDAMENTO
@@ -51,7 +51,7 @@
  .project-filter-label[data-status="FINALIZADO"]:hover {
      background-color: rgba(92, 184, 92, 0.2);
  }
- .project-filter-label[data-status="EM-ANALISE"]:hover {
+ .project-filter-label[data-status="PAUSADO"]:hover {
      background-color: rgba(91, 192, 222, 0.2);
  }
  .project-filter-label[data-status="PENDENTE"]:hover {
@@ -72,6 +72,14 @@
              .replace(/-+/g, '-');
      }
 
+     function normalizeLegacyStatus(value) {
+         var normalized = normalizeStatus(value);
+         if (normalized === 'EM-ANALISE') {
+             return 'PAUSADO';
+         }
+         return normalized;
+     }
+
      function getStoredStatuses() {
          try {
              var stored = localStorage.getItem(storageKey);
@@ -80,7 +88,13 @@
              }
 
              var parsed = JSON.parse(stored);
-             return Array.isArray(parsed) ? parsed : null;
+             if (!Array.isArray(parsed)) {
+                 return null;
+             }
+
+             return parsed.map(function(status) {
+                 return normalizeLegacyStatus(status);
+             });
          } catch (error) {
              return null;
          }

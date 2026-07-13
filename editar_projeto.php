@@ -5,10 +5,10 @@ $nomeDoProjeto = '';
 $cliente = '';
 $dataPrev = '';
 $datasAlt = array();
-
+$status = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $idProj = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-
+    
     if ($idProj > 0) {
         require_once 'config/conexao.php';
 
@@ -235,6 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $idProjeto > 0) {
     $stmtSelectComentarios->bindValue(':id_proj', $idProjeto, PDO::PARAM_INT);
     $stmtSelectComentarios->execute();
     $comentarios = $stmtSelectComentarios->fetchAll(PDO::FETCH_ASSOC);
+    $status = $_GET['status'];
 }
 
 ?>
@@ -441,7 +442,9 @@ require_once "config/header.php";
                                                             <div class="form-group row">
                                                                 <label class="control-label col-md-3 col-sm-3 col-12" for="newDataPrev">Nova Data Prevista</label>
                                                                 <div class="col-md-2 col-sm-2 col-12">
-                                                                    <input type="text" class="form-control"
+                                                                    <input <?php if($status == "FINALIZADO"){
+                                                                        echo "disabled";
+                                                                    }?> type="text" class="form-control"
                                                                         data-inputmask="'mask': '99/99/9999'" name="newDataPrev" id="newDataPrev">
                                                                     <span class="fa fa-calendar form-control-feedback right"
                                                                         aria-hidden="true"></span>

@@ -159,10 +159,19 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
     $sql = "SELECT A.id, A.tarefa, A.etapa, A.area, A.DtHr_Inicio, A.DtHr_concluido, A.status, B.nome_proj
             FROM tarefas AS A
             JOIN projetos AS B ON A.id_proj = B.id
-            WHERE B.id = :id AND A.etapa = :etapa";
+            WHERE B.id = :id";
+
+    if ($etapa !== '') {
+        $sql .= " AND TRIM(UPPER(A.etapa)) = TRIM(UPPER(:etapa))";
+    }
+
     $stmtSelect = $conexao->prepare($sql);
     $stmtSelect->bindParam(":id", $idProjeto, PDO::PARAM_INT);
-    $stmtSelect->bindParam(":etapa", $etapa, PDO::PARAM_STR);
+
+    if ($etapa !== '') {
+        $stmtSelect->bindParam(":etapa", $etapa, PDO::PARAM_STR);
+    }
+
     $stmtSelect->execute();
     $result = $stmtSelect->fetchAll(PDO::FETCH_ASSOC);
 
@@ -338,7 +347,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
                         } else {
                             ?>
                             <tr>
-                                <td colspan="3" class="text-center">Nenhuma tarefa cadastrada para esta etapa.</td>
+                                <td colspan="5" class="text-center">Nenhuma tarefa cadastrada para esta etapa.</td>
                             </tr>
                         <?php
                         }
