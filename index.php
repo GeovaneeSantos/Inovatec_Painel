@@ -1,5 +1,23 @@
 <?php
 require_once "config/conexao.php";
+
+function getProjectProgress($conexao, $projectId)
+{
+    $sql = "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'CONCLUIDO' THEN 1 ELSE 0 END) as concluidas FROM tarefas WHERE id_proj = :id";
+    $stmt = $conexao->prepare($sql);
+    $stmt->bindParam(':id', $projectId, PDO::PARAM_INT);
+    $stmt->execute();
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $total = (int) ($data['total'] ?? 0);
+    $concluidas = (int) ($data['concluidas'] ?? 0);
+
+    if ($total === 0) {
+        return 0;
+    }
+    return round(($concluidas / $total) * 100);
+}
+
 function getStageProgress($conexao, $projectId, $stageName)
 {
     $sql = "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'CONCLUIDO' THEN 1 ELSE 0 END) as concluidas FROM tarefas WHERE id_proj = :id AND etapa = :etapa";
@@ -38,6 +56,7 @@ function getExecStageProgress($conexao, $projectId, $stageName)
     return round(($executando / $total) * 100);
 }
 
+//Pega a data limite e cor de fundo (Atrasado = vermelho / Limite perto = Amarelo / Ok = Branco)
 function getDeadlineClass($conexao, array $project)
 {
     $deadline = '';
@@ -83,6 +102,7 @@ function getDeadlineClass($conexao, array $project)
     return '';
 }
 
+//Listagem dos projetos
 $sql = "SELECT * FROM projetos ORDER BY id";
 $stmtSelect = $conexao->prepare($sql);
 $stmtSelect->execute();
@@ -90,6 +110,7 @@ $result = $stmtSelect->fetchAll();
 
 $allowedProjectStatuses = ['EM-ANDAMENTO', 'FINALIZADO', 'EM-ANALISE', 'PENDENTE'];
 
+//Atualização de Status e Exclusão de Projetos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
     require_once 'config/conexao.php';
 
@@ -160,6 +181,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
         echo json_encode(['erro' => 'Dados inválidos']);
         exit();
     }
+}
+
+//Verifica se eas etapas estão todas concluídas e se estiverem muda o projeto para finalizado
+for ($i = 0; $i < sizeof($result); $i++) {
+    if (getProjectProgress($conexao, $result[$i]['id']) == 100){
+        $id = $result[$i]['id'];
+        $sqlUpdateStatus = "UPDATE projetos SET status = 'FINALIZADO' WHERE id = :id";
+        $stmtUpdateStatus = $conexao->prepare($sqlUpdateStatus);
+        $stmtUpdateStatus->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmtUpdateStatus->execute();
+        header("Refresh: 5");
+    };
 }
 ?>
 

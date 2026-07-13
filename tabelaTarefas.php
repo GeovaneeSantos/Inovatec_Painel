@@ -325,7 +325,9 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
                                     <td style="vertical-align: middle;"><?php echo htmlspecialchars($row['DtHr_concluido'] ?? ''); ?></td>
                                     <td style="vertical-align: middle;">
                                         <select <?php if ($row['status'] == "CONCLUIDO"){echo "disabled";}?> id="status-select" class="form-control status-select" data-task-id="<?php echo (int) $row['id']; ?>" onchange="atualizarStatus(this)">
+                                        <?php if ($status != 'EM-EXECUCAO') {?>   
                                             <option value="PENDENTE" <?php echo ($status === 'PENDENTE') ? 'selected' : ''; ?>>PENDENTE</option>
+                                        <?php } ?>
                                             <option value="EM-EXECUCAO" <?php echo ($status === 'EM-EXECUCAO') ? 'selected' : ''; ?>>EM-EXECUCAO</option>
                                             <option value="CONCLUIDO" <?php echo ($status === 'CONCLUIDO') ? 'selected' : ''; ?>>CONCLUIDO</option>
                                         </select>
